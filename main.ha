@@ -29,14 +29,23 @@ export fn main() void = {
 	for (let i = 0; true; i += 1) {
 		const token = match(lex::lex(&lexer)) {
 		case let t: lex::token =>
-			if (t.0 == lex::ltok::EOF)
-				break;
 			yield t;
 		case lex::error =>
 			fmt::fatalf("{}: error lexing token {}.",
 				os::args[0], i);
 		};
 
-		fmt::printfln("{}: {}", i, lex::tokstr(token))!;
+		if (token.0 == lex::ltok::EOF)
+			break;
+
+		fmt::print(lex::tokstr(token))!;
+		if (token.0 == lex::ltok::SEMICOLON) {
+			fmt::println()!;
+		} else {
+			fmt::print(" ")!;
+		};
+
+		//fmt::printf(lex::comment(&lexer))!;
 	};
+
 };
