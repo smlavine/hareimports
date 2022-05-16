@@ -25,5 +25,18 @@ export fn main() void = {
 	// won't be necessary once tuple assignment is implemented.
 	const file = filepath.0, path = filepath.1;
 
-	fmt::printfln("path = {}", path)!;
+	const lexer = lex::init(file, path, lex::flags::COMMENTS);
+	for (let i = 0; true; i += 1) {
+		const token = match(lex::lex(&lexer)) {
+		case let t: lex::token =>
+			if (t.0 == lex::ltok::EOF)
+				break;
+			yield t;
+		case lex::error =>
+			fmt::fatalf("{}: error lexing token {}.",
+				os::args[0], i);
+		};
+
+		fmt::printfln("{}: {}", i, lex::tokstr(token))!;
+	};
 };
