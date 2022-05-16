@@ -4,6 +4,30 @@ use hare::lex;
 use io;
 use os;
 
+fn printlex(lexp: *lex::lexer) void = {
+	for (let i = 0; true; i += 1) {
+		const token = match(lex::lex(lexp)) {
+		case let t: lex::token =>
+			yield t;
+		case lex::error =>
+			fmt::fatalf("{}: error lexing token {}.",
+				os::args[0], i);
+		};
+
+		if (token.0 == lex::ltok::EOF)
+			break;
+
+		fmt::print(lex::tokstr(token))!;
+		if (token.0 == lex::ltok::SEMICOLON) {
+			fmt::println()!;
+		} else {
+			fmt::print(" ")!;
+		};
+
+		//fmt::printf(lex::comment(lexp))!;
+	};
+};
+
 export fn main() void = {
 	// tuple assignment isn't implemented yet.
 	//let (file, path): (io::handle, str) = switch(len(os::args)) {
@@ -26,26 +50,6 @@ export fn main() void = {
 	const file = filepath.0, path = filepath.1;
 
 	const lexer = lex::init(file, path, lex::flags::COMMENTS);
-	for (let i = 0; true; i += 1) {
-		const token = match(lex::lex(&lexer)) {
-		case let t: lex::token =>
-			yield t;
-		case lex::error =>
-			fmt::fatalf("{}: error lexing token {}.",
-				os::args[0], i);
-		};
 
-		if (token.0 == lex::ltok::EOF)
-			break;
-
-		fmt::print(lex::tokstr(token))!;
-		if (token.0 == lex::ltok::SEMICOLON) {
-			fmt::println()!;
-		} else {
-			fmt::print(" ")!;
-		};
-
-		//fmt::printf(lex::comment(&lexer))!;
-	};
-
+	printlex(&lexer);
 };
