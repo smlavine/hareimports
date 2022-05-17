@@ -17,14 +17,16 @@ fn printlex(lexp: *lex::lexer) void = {
 		if (token.0 == lex::ltok::EOF)
 			break;
 
+		const comment = lex::comment(lexp);
+		if (comment != "")
+			fmt::printfln("COMMENTED: \"{}\"", comment)!;
+
 		fmt::print(lex::tokstr(token))!;
 		if (token.0 == lex::ltok::SEMICOLON) {
 			fmt::println()!;
 		} else {
 			fmt::print(" ")!;
 		};
-
-		//fmt::printf(lex::comment(lexp))!;
 	};
 };
 
