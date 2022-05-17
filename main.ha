@@ -6,12 +6,12 @@ use os;
 
 fn printlex(lexp: *lex::lexer) void = {
 	for (let i = 0; true; i += 1) {
-		const token = match(lex::lex(lexp)) {
+		const token = match (lex::lex(lexp)) {
 		case let t: lex::token =>
 			yield t;
-		case lex::error =>
-			fmt::fatalf("{}: error lexing token {}.",
-				os::args[0], i);
+		case let e: lex::error =>
+			fmt::fatalf("{}: lex error ({}): {}",
+				os::args[0], i, lex::strerror(e));
 		};
 
 		if (token.0 == lex::ltok::EOF)
