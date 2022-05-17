@@ -3,15 +3,9 @@ use hare::lex;
 use io;
 use os;
 
-fn printlex(lexp: *lex::lexer) void = {
+fn printlex(lexp: *lex::lexer) (void | lex::error) = {
 	for (let i = 0; true; i += 1) {
-		const token = match (lex::lex(lexp)) {
-		case let t: lex::token =>
-			yield t;
-		case let e: lex::error =>
-			fmt::fatalf("{}: lex error ({}): {}",
-				os::args[0], i, lex::strerror(e));
-		};
+		const token = lex::lex(lexp)?;
 
 		if (token.0 == lex::ltok::EOF)
 			break;
@@ -32,5 +26,9 @@ fn printlex(lexp: *lex::lexer) void = {
 export fn main() void = {
 	const lexer = lex::init(os::stdin, "<stdin>", lex::flags::COMMENTS);
 
-	printlex(&lexer);
+	match (printlex(&lexer)) {
+	case void => void;
+	case let e: lex::error =>
+		fmt::fatalf("lex error: {}", lex::strerror(e));
+	};
 };
