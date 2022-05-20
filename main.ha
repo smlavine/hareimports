@@ -78,6 +78,12 @@ fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
 	if (first.0 != lex::ltok::NAME)
 		return badtoken(first);
 
+	let import = import {
+		location = first.2,
+		module = "",
+		alias = alias,
+	};
+
 	// TODO: concat to module_builder? But really only needed after
 	// the second case.
 
@@ -85,11 +91,8 @@ fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
 	switch (second.0) {
 	case lex::ltok::SEMICOLON =>
 		// Unaliased top-level (i.e. not a submodule) import
-		return import {
-			location = first.2,
-			module = strings::dup(lex::tokstr(first)),
-			alias = alias,
-		};
+		import.module = strings::dup(lex::tokstr(first));
+		return import;
 	case lex::ltok::EQUAL =>
 		// Import alias
 		if (alias == "") {
