@@ -96,11 +96,10 @@ fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
 	case lex::ltok::EQUAL =>
 		// Import alias
 		if (alias == "") {
-			alias = strings::dup(lex::tokstr(first));
-			return getimport(lexp, alias);
-		} else {
-			return badtoken(second);
+			return getimport(lexp,
+				strings::dup(lex::tokstr(first)));
 		};
+		return badtoken(second);
 	case lex::ltok::DOUBLE_COLON =>
 		// TODO: parse submodules and unqualified forms
 		//
