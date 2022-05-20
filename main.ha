@@ -15,9 +15,12 @@ fn printlex(lexp: *lex::lexer) (void | lex::error) = {
 			fmt::printfln("COMMENTED: \"{}\"", comment)!;
 
 		fmt::print(lex::tokstr(token))!;
-		if (token.0 == lex::ltok::SEMICOLON) {
+		switch (token.0) {
+		case lex::ltok::SEMICOLON =>
 			fmt::println()!;
-		} else {
+		case lex::ltok::NAME =>
+			fmt::print("<< (NAME) ")!;
+		case =>
 			fmt::print(" ")!;
 		};
 	};
