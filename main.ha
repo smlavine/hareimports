@@ -39,8 +39,8 @@ export fn imports_freeall(imports: []import) void = {
 	free(imports);
 };
 
-// Returns a lex::syntax error from the location and string representation of
-// the provided token.
+// Returns a [[lex::syntax]] error from the location and string representation
+// of the provided token.
 fn badtoken(t: lex::token) lex::syntax = (t.2, lex::tokstr(t));
 
 // Parses a single import statement from the provided [[hare::lex::lexer]].
