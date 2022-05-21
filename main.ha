@@ -68,9 +68,6 @@ fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
 	// DOUBLE_COLON
 	// SEMICOLON
 
-	let module_builder = strio::dynamic();
-	defer io::close(&module_builder)!;
-
 	// The first token has to be a name: either the beginning of
 	// an import-alias or the beginning of an identifier.
 	// See also §6.4 (Identifiers).
@@ -84,8 +81,8 @@ fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
 		alias = alias,
 	};
 
-	// TODO: concat to module_builder? But really only needed after
-	// the second case.
+	let module_builder = strio::dynamic();
+	defer io::close(&module_builder)!;
 
 	const second = lex::lex(lexp)?;
 	switch (second.0) {
@@ -101,24 +98,47 @@ fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
 		};
 		return badtoken(second);
 	case lex::ltok::DOUBLE_COLON =>
-		// TODO: parse submodules and unqualified forms
-		//
-		// temporary unlex call, so we can continue past submodule
-		// import. The loop in getimports requires the next token to
-		// be a use keyword to continue.
-		lex::unlex(lexp, (lex::ltok::USE, "use", first.2));
-		// for now, copy from SEMICOLON case, parsing only top level of
-		// module.
-		return import {
-			location = first.2,
-			module = strings::dup(lex::tokstr(first)),
-			alias = alias,
-		};
+		strio::concat(&module_builder, lex::tokstr(first), "::")!;
 	case =>
 		return badtoken(second);
 	};
 
-	//abort("end of getimport() is unreachable");
+	// The previous token was a DOUBLE_COLON.
+
+	const third = lex::lex(lexp)?;
+	switch (third.0) {
+	case lex::ltok::LBRACE =>
+		abort("member-list import (§6.12.4) not supported yet.");
+	case lex::ltok::TIMES =>
+		abort("unqualified import (§6.12.6) not supported yet.");
+	case lex::ltok::NAME =>
+		strio::concat(&module_builder, lex::tokstr(third))!;
+	case =>
+		return badtoken(third);
+	};
+
+	for (true) {
+		const possible_dcolon = lex::lex(lexp)?;
+		switch (possible_dcolon.0) {
+		case lex::ltok::DOUBLE_COLON =>
+			strio::concat(&module_builder, "::")!;
+		case lex::ltok::SEMICOLON =>
+			break;
+		case =>
+			return badtoken(possible_dcolon);
+		};
+
+		const name = lex::lex(lexp)?;
+		switch (name.0) {
+		case lex::ltok::NAME =>
+			strio::concat(&module_builder, lex::tokstr(name))!;
+		case =>
+			return badtoken(name);
+		};
+	};
+
+	import.module = strings::dup(strio::string(&module_builder));
+	return import;
 };
 
 // Returns a slice of [[import]]s or a [[hare::lex::error]]. The slice must be
