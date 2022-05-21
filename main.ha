@@ -20,32 +20,6 @@ use os;
 use strio;
 use strings;
 
-// The relevant grammar from the Hare spec, 6.12 (Units):
-//
-// sub-unit:
-// 	imports(opt) declarations(opt)
-//
-// imports:
-// 	use-statement
-// 	use-statement imports
-//
-// use-statement:
-// 	use import-alias(opt) identifier ;
-// 	use import-alias(opt) identifier :: { member-list } ;
-// 	use identifier :: * ;
-//
-// import-alias:
-// 	name =
-//
-// member-list:
-// 	member ,(opt)
-// 	member , member-list
-//
-// member:
-// 	name
-// 	name = name
-//
-
 // Represents a module that has been imported into the sub-unit.
 export type import = struct {
 	// location of the first token in import after the use keyword
@@ -74,15 +48,6 @@ fn badtoken(t: lex::token) lex::syntax = (t.2, lex::tokstr(t));
 // Only allow an alias to be parsed if the alias parameter is empty.
 // Returns an [[import]] on success, or [[hare::lex::error]] on failure.
 fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
-	// USE
-	// <opt>
-	// NAME
-	// EQUAL
-	// </opt>
-	// NAME
-	// DOUBLE_COLON
-	// SEMICOLON
-
 	// The first token has to be a name: either the beginning of
 	// an import-alias or the beginning of an identifier.
 	// See also §6.4 (Identifiers).
