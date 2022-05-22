@@ -67,7 +67,7 @@ fn getimport(lexp: *lex::lexer, alias: str) (import | lex::error) = {
 	const second = lex::lex(lexp)?;
 	switch (second.0) {
 	case lex::ltok::SEMICOLON =>
-		// Unaliased top-level (i.e. not a submodule) import
+		// top-level (i.e. not a submodule) import
 		import.module = strings::dup(lex::tokstr(first));
 		return import;
 	case lex::ltok::EQUAL =>
