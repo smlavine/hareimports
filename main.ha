@@ -1,4 +1,4 @@
-// hareimports - manage imports for hare source files
+// hareimports - Hare import manager
 // Copyright (C) 2022 Sebastian LaVine <mail@smlavine.com>
 // Copyright (C) 2022 Sebastian <sebastian@sebsite.pw>
 // 

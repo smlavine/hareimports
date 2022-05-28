@@ -1,11 +1,10 @@
 # [hareimports](https://sr.ht/~smlavine/hareimports)
 
-hareimports is a tool to automatically add used imports and remove
-unused imports in [Hare](https://harelang.org) source files. Similar to
-goimports.
+hareimports is a tool to manage imports in [Hare](https://harelang.org)
+source files. Similar to goimports.
 
-Source files are read from stdin. Unused imports are removed, and
-unimported modules are imported; the result is printed to stdout.
+For source files in a given Hare module, unused imports are removed, and
+unimported modules are imported.
 
 Licensed under GPLv3.
 
