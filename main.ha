@@ -55,7 +55,7 @@ export fn main() void = {
 			case let t: []module::tag =>
 				yield t;
 			};
-		case => abort(); // unreachable
+		case => abort("impossible getopt case reached");
 		};
 	};
 
