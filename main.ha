@@ -1,5 +1,6 @@
 // hareimports - manage imports for hare source files
 // Copyright (C) 2022 Sebastian LaVine <mail@smlavine.com>
+// Copyright (C) 2022 Sebastian <sebastian@sebsite.pw>
 // 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
