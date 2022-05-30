@@ -24,11 +24,16 @@ use hare::unparse;
 use io;
 use os;
 
+type source_file = struct {
+	path: str,
+	u: ast::subunit,
+};
+
 // Lists the imports of a given file, in the order they are imported.
-fn list(path: str, subunit: ast::subunit) void = {
-	fmt::printfln("{}:", path)!;
-	for (let i = 0z; i < len(subunit.imports); i += 1) {
-		const m = &subunit.imports[i];
+fn list(source: source_file) void = {
+	fmt::printfln("{}:", source.path)!;
+	for (let i = 0z; i < len(source.u.imports); i += 1) {
+		const m = &source.u.imports[i];
 		const s = unparse::identstr(m.ident);
 		defer free(s);
 
@@ -55,7 +60,7 @@ export fn main() void = {
 
 	// XXX: have a slice of operations to do in order, instead of just
 	// allowing one?
-	let op: *fn(path: str, subunit: ast::subunit) void = &list;
+	let op: *fn(source: source_file) void = &list;
 
 	for (let i = 0z; i < len(cmd.opts); i += 1) {
 		const opt = cmd.opts[i];
@@ -105,8 +110,8 @@ export fn main() void = {
 
 	// TODO: enum slice
 
-	let sourcefiles: [](str, ast::subunit) = [];
-	defer free(sourcefiles);
+	let sources: []source_file = [];
+	defer free(sources);
 
 	for (let i = 0z; i < len(ver.inputs); i += 1) {
 		const input = ver.inputs[i];
@@ -124,7 +129,10 @@ export fn main() void = {
 			fmt::fatal(parse::strerror(e));
 		};
 
-		append(sourcefiles, (input.path, subunit));
+		append(sources, source_file {
+			path = input.path,
+			u = subunit,
+		});
 
 		// TODO: look for enums declared in this subunit; add to slice
 		// of module enums declared above.
@@ -133,14 +141,14 @@ export fn main() void = {
 	// We must look for enums in all source files before processing
 	// the imports.
 
-	for (let i = 0z; i < len(sourcefiles); i += 1) {
+	for (let i = 0z; i < len(sources); i += 1) {
 		// TODO: parse subunit.decls to see if imports are unused or
 		// if unimported modules are used
 		null;
 	};
 
-	for (let i = 0z; i < len(sourcefiles); i += 1) {
-		op(sourcefiles[i].0, sourcefiles[i].1);
-		ast::subunit_finish(sourcefiles[i].1);
+	for (let i = 0z; i < len(sources); i += 1) {
+		op(sources[i]);
+		ast::subunit_finish(sources[i].u);
 	};
 };
