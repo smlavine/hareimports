@@ -24,6 +24,23 @@ use hare::unparse;
 use io;
 use os;
 
+// Lists the imports of a given file, in the order they are imported.
+fn list(path: str, subunit: ast::subunit) void = {
+	fmt::printfln("{}:", path)!;
+	for (let i = 0z; i < len(subunit.imports); i += 1) {
+		const m = &subunit.imports[i];
+		const s = unparse::identstr(m.ident);
+		defer free(s);
+
+		switch (m.mode) {
+		case ast::import_mode::ALIAS =>
+			fmt::printfln("{} (= {})", m.alias, s)!;
+		case =>
+			fmt::println(s)!;
+		};
+	};
+};
+
 export fn main() void = {
 	const help: []getopt::help = [
 		"Hare import manager",
@@ -35,11 +52,17 @@ export fn main() void = {
 
 	let tags: []module::tag = [];
 	defer module::tags_free(tags);
+
+	// XXX: have a slice of operations to do in order, instead of just
+	// allowing one?
+	let op: *fn(path: str, subunit: ast::subunit) void = &list;
+
 	for (let i = 0z; i < len(cmd.opts); i += 1) {
 		const opt = cmd.opts[i];
+		// TODO: parse other options to indicate different operations
+		switch (opt.0) {
 		// XXX: should accept multiple -T options, and maybe also -X
 		// See addtags and deltags in cmd/hare/subcmds.ha
-		switch (opt.0) {
 		case 'T' =>
 			// This flag is needed for hareimports to know whether
 			// an indentifier refers to a remote module/enum or a
@@ -80,6 +103,11 @@ export fn main() void = {
 		fmt::fatal(module::strerror(e));
 	};
 
+	// TODO: enum slice
+
+	let sourcefiles: [](str, ast::subunit) = [];
+	defer free(sourcefiles);
+
 	for (let i = 0z; i < len(ver.inputs); i += 1) {
 		const input = ver.inputs[i];
 		if (input.ft != module::filetype::HARE) {
@@ -95,20 +123,24 @@ export fn main() void = {
 		case let e: parse::error =>
 			fmt::fatal(parse::strerror(e));
 		};
-		defer ast::subunit_finish(subunit);
 
-		fmt::printfln("{}:", input.path)!;
-		for (let i = 0z; i < len(subunit.imports); i += 1) {
-			const m = &subunit.imports[i];
+		append(sourcefiles, (input.path, subunit));
 
-			const s = unparse::identstr(m.ident);
-			defer free(s);
-			switch (m.mode) {
-			case ast::import_mode::ALIAS =>
-				fmt::printfln("{} (= {})", m.alias, s)!;
-			case =>
-				fmt::println(s)!;
-			};
-		};
+		// TODO: look for enums declared in this subunit; add to slice
+		// of module enums declared above.
+	};
+
+	// We must look for enums in all source files before processing
+	// the imports.
+
+	for (let i = 0z; i < len(sourcefiles); i += 1) {
+		// TODO: parse subunit.decls to see if imports are unused or
+		// if unimported modules are used
+		null;
+	};
+
+	for (let i = 0z; i < len(sourcefiles); i += 1) {
+		op(sourcefiles[i].0, sourcefiles[i].1);
+		ast::subunit_finish(sourcefiles[i].1);
 	};
 };
