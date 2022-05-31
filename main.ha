@@ -60,7 +60,7 @@ export fn main() void = {
 
 	// XXX: have a slice of operations to do in order, instead of just
 	// allowing one?
-	let op: *fn(source: source_file) void = &list;
+	let op: *fn(_: source_file) void = &list;
 
 	for (let i = 0z; i < len(cmd.opts); i += 1) {
 		const opt = cmd.opts[i];
