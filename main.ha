@@ -29,6 +29,16 @@ type source_file = struct {
 	path: str,
 };
 
+// Displays a diff of the given file, before and after processing imports.
+fn diff(source: source_file) void = {
+	abort("diff not supported yet");
+};
+
+// Edits the given file in place.
+fn in_place(source: source_file) void = {
+	abort("editing in place not supported yet");
+};
+
 // Lists the imports of the given file, in the order they are imported.
 fn list(source: source_file) void = {
 	const u: *ast::subunit = &source; // sub-typing
@@ -49,6 +59,9 @@ fn list(source: source_file) void = {
 export fn main() void = {
 	const help: []getopt::help = [
 		"Hare import manager",
+		('d', "display diffs"),
+		('i', "edit files in place"),
+		('l', "list source file imports (default)"),
 		('T', "tags...", "set tags"),
 		"[<path>]"
 	];
@@ -66,9 +79,17 @@ export fn main() void = {
 		const opt = cmd.opts[i];
 		// TODO: parse other options to indicate different operations
 		switch (opt.0) {
-		// XXX: should accept multiple -T options, and maybe also -X
-		// See addtags and deltags in cmd/hare/subcmds.ha
+		case 'd' =>
+			op = &diff;
+		case 'i' =>
+			op = &in_place;
+		case 'l' =>
+			op = &list;
 		case 'T' =>
+			// XXX: should accept multiple -T options, and maybe
+			// also -X
+			// See addtags and deltags in cmd/hare/subcmds.ha
+
 			// This flag is needed for hareimports to know whether
 			// an indentifier refers to a remote module/enum or a
 			// local enum only defined within a tagset.
