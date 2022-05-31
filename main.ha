@@ -25,21 +25,21 @@ use io;
 use os;
 
 type source_file = struct {
+	subunit: ast::subunit,
 	path: str,
-	u: ast::subunit,
 };
 
 // Lists the imports of a given file, in the order they are imported.
 fn list(source: source_file) void = {
+	const u: *ast::subunit = &source; // sub-typing
 	fmt::printfln("{}:", source.path)!;
-	for (let i = 0z; i < len(source.u.imports); i += 1) {
-		const m = &source.u.imports[i];
-		const s = unparse::identstr(m.ident);
+	for (let i = 0z; i < len(u.imports); i += 1) {
+		const s = unparse::identstr(u.imports[i].ident);
 		defer free(s);
 
-		switch (m.mode) {
+		switch (u.imports[i].mode) {
 		case ast::import_mode::ALIAS =>
-			fmt::printfln("{} (= {})", m.alias, s)!;
+			fmt::printfln("{} (= {})", u.imports[i].alias, s)!;
 		case =>
 			fmt::println(s)!;
 		};
@@ -131,7 +131,7 @@ export fn main() void = {
 
 		append(sources, source_file {
 			path = input.path,
-			u = subunit,
+			subunit = subunit,
 		});
 
 		// TODO: look for enums declared in this subunit; add to slice
@@ -149,6 +149,6 @@ export fn main() void = {
 
 	for (let i = 0z; i < len(sources); i += 1) {
 		op(sources[i]);
-		ast::subunit_finish(sources[i].u);
+		ast::subunit_finish(sources[i].subunit);
 	};
 };
