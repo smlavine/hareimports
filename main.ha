@@ -29,7 +29,7 @@ type source_file = struct {
 	path: str,
 };
 
-// Lists the imports of a given file, in the order they are imported.
+// Lists the imports of the given file, in the order they are imported.
 fn list(source: source_file) void = {
 	const u: *ast::subunit = &source; // sub-typing
 	fmt::printfln("{}:", source.path)!;
