@@ -3,15 +3,17 @@
 
 HARE = hare
 
+MODULE = cmd/hareimports/
+
 all: hareimports
 
-hareimports:
-	$(HARE) build $(HAREFLAGS) -o $@
+hareimports: $(SRC)
+	$(HARE) build $(HAREFLAGS) -o $@ $(MODULE)
 
 check:
-	$(HARE) test
+	$(HARE) test $(MODULE)
 
 clean:
 	rm -f hareimports
 
-.PHONY: all clean hareimports
+.PHONY: all check clean
