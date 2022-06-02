@@ -3,15 +3,15 @@
 
 HARE = hare
 
-MODULE = cmd/hareimports/
+SRC = editing.ha main.ha
 
 all: hareimports
 
 hareimports: $(SRC)
-	$(HARE) build $(HAREFLAGS) -o $@ $(MODULE)
+	$(HARE) build $(HAREFLAGS) -o $@
 
 check:
-	$(HARE) test $(MODULE)
+	$(HARE) test
 
 clean:
 	rm -f hareimports

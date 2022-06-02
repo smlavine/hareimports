@@ -14,12 +14,11 @@
 // along with this program. If not, see http://www.gnu.org/licenses/.
 
 // Displays a diff of the given file, before and after processing imports.
-fn diff(source: source_file) void = {
+export fn diff(source: source_file) void = {
 	abort("diff not supported yet");
 };
 
 // Edits the given file in place.
-fn in_place(source: source_file) void = {
+export fn in_place(source: source_file) void = {
 	abort("editing in place not supported yet");
 };
-

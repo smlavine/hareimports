@@ -20,12 +20,30 @@ use hare::ast;
 use hare::lex;
 use hare::module;
 use hare::parse;
+use hare::unparse;
 use io;
 use os;
 
 type source_file = struct {
 	subunit: ast::subunit,
 	path: str,
+};
+
+// Lists the imports of the given file, in the order they are imported.
+export fn list(source: source_file) void = {
+	const u: *ast::subunit = &source; // sub-typing
+	fmt::printfln("{}:", source.path)!;
+	for (let i = 0z; i < len(u.imports); i += 1) {
+		const s = unparse::identstr(u.imports[i].ident);
+		defer free(s);
+
+		switch (u.imports[i].mode) {
+		case ast::import_mode::ALIAS =>
+			fmt::printfln("{} (= {})", u.imports[i].alias, s)!;
+		case =>
+			fmt::println(s)!;
+		};
+	};
 };
 
 export fn main() void = {
