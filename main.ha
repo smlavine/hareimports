@@ -155,7 +155,7 @@ export fn main() void = {
 	for (let i = 0z; i < len(sources); i += 1) {
 		// TODO: parse subunit.decls to see if imports are unused or
 		// if unimported modules are used
-		null;
+		break;
 	};
 
 	for (let i = 0z; i < len(sources); i += 1) {
