@@ -10,10 +10,10 @@ all: hareimports
 hareimports: $(SRC)
 	$(HARE) build $(HAREFLAGS) -o $@
 
-test:
+check:
 	$(HARE) test
 
 clean:
 	rm -f hareimports
 
-.PHONY: all clean test
+.PHONY: all check clean
