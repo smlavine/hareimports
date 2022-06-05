@@ -38,10 +38,19 @@ export fn list(source: source_file) void = {
 		defer free(s);
 
 		switch (u.imports[i].mode) {
-		case ast::import_mode::ALIAS =>
-			fmt::printfln("{} (= {})", u.imports[i].alias, s)!;
-		case =>
+		case ast::import_mode::IDENT =>
 			fmt::println(s)!;
+		case ast::import_mode::ALIAS =>
+			fmt::printfln("{} = {}", u.imports[i].alias, s)!;
+		case ast::import_mode::MEMBERS =>
+			fmt::printf("{}::{{", s)!;
+			const nlim = len(u.imports[i].objects) - 1;
+			for (let n = 0z; n < nlim; n += 1)
+				fmt::printf("{}, ",
+					u.imports[i].objects[n].1)!;
+			fmt::printfln("{}}}", u.imports[i].objects[nlim].1)!;
+		case ast::import_mode::WILDCARD =>
+			fmt::printfln("{}::*", s)!;
 		};
 	};
 };

@@ -18,15 +18,16 @@ use hare::lex;
 use hare::parse;
 use io;
 use os;
+use strings;
 use strio;
 
 def TEST_SOURCE: str = `
 use fmt;
-use io;
+use strings::{tokenizer, compare, trimsuffix};
+use os::*;
+use ebcdic = ascii;
 
-export fn main() void = {
-	fmt::println("Hello")!;
-};
+export fn main() void = void;
 `;
 
 // Makes a source_file from the constant source str defined above.
@@ -51,5 +52,18 @@ fn mktestsource() source_file = {
 	list(source);
 	os::stdout = orig_stdout;
 
-	assert(strio::string(&stream) == "TEST_SOURCE:\nfmt\nio\n");
+	const correct = [
+		"TEST_SOURCE:",
+		"fmt",
+		"strings::{tokenizer, compare, trimsuffix}",
+		"os::*",
+		"ebcdic = ascii",
+		"", // strings::split includes what is after the last "\n"
+	];
+	const testlines = strings::split(strio::string(&stream), "\n");
+	defer free(testlines);
+
+	assert(len(correct) == len(testlines));
+	for (let i = 0z; i < len(correct); i += 1)
+		assert(correct[i] == testlines[i]);
 };
