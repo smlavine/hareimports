@@ -58,14 +58,20 @@ export fn list(source: source_file) void = {
 export fn main() void = {
 	const help: []getopt::help = [
 		"Hare import manager",
+		('a', "operate on all source files in module"),
 		('d', "display diffs"),
 		('i', "edit files in place"),
 		('l', "list source file imports (default)"),
+		('m', "module path", "use a module that isn't the cwd"),
 		('T', "tags...", "set tags"),
-		"[<path>]"
+		"file..."
 	];
 	const cmd = getopt::parse(os::args, help...);
 	defer getopt::finish(&cmd);
+
+	let use_all = false;
+
+	let module_path = ".";
 
 	let tags: []module::tag = [];
 	defer module::tags_free(tags);
@@ -78,12 +84,16 @@ export fn main() void = {
 		const opt = cmd.opts[i];
 		// TODO: parse other options to indicate different operations
 		switch (opt.0) {
+		case 'a' =>
+			use_all = true;
 		case 'd' =>
 			op = &diff;
 		case 'i' =>
 			op = &in_place;
 		case 'l' =>
 			op = &list;
+		case 'm' =>
+			module_path = opt.1;
 		case 'T' =>
 			// XXX: should accept multiple -T options, and maybe
 			// also -X
@@ -108,20 +118,10 @@ export fn main() void = {
 		};
 	};
 
-	const path = switch (len(cmd.args)) {
-	case 0 =>
-		yield ".";
-	case 1 =>
-		yield cmd.args[0];
-	case =>
-		getopt::printusage(os::stderr, "hareimports", help);
-		os::exit(1);
-	};
-
 	const mctx = module::context_init(tags, [], "");
 	defer module::context_finish(&mctx);
 
-	const ver = match (module::scan(&mctx, path)) {
+	const ver = match (module::scan(&mctx, module_path)) {
 	case let v: module::version =>
 		yield v;
 	case let e: module::error =>
@@ -158,17 +158,29 @@ export fn main() void = {
 		// of module enums declared above.
 	};
 
-	// We must look for enums in all source files before processing
-	// the imports.
-
-	for (let i = 0z; i < len(sources); i += 1) {
-		// TODO: parse subunit.decls to see if imports are unused or
-		// if unimported modules are used
-		break;
+	let op_indices: []size = [];
+	if (use_all) {
+		for (let i = 0z; i < len(sources); i += 1)
+			append(op_indices, i);
+	} else if (len(cmd.args) == 0) {
+		fmt::errorln("error: no files provided")!;
+		getopt::printusage(os::stderr, "hareimports", help);
+		os::exit(1);
+	} else {
+		for (let i = 0z; i < len(sources); i += 1) {
+			for (let j = 0z; j < len(cmd.args); j += 1) {
+				// TODO: check whether the paths resolve to the
+				// same file; right now the absolute path must
+				// be provided.
+				if (sources[i].path == cmd.args[j])
+					append(op_indices, i);
+			};
+		};
 	};
+	defer free(op_indices);
 
-	for (let i = 0z; i < len(sources); i += 1) {
-		op(sources[i]);
-		ast::subunit_finish(sources[i].subunit);
+	for (let n = 0z; n < len(op_indices); n += 1) {
+		op(sources[op_indices[n]]);
+		ast::subunit_finish(sources[op_indices[n]].subunit);
 	};
 };
