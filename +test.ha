@@ -32,7 +32,7 @@ export fn main() void = void;
 
 // Makes a source_file from the constant source str defined above.
 fn mktestsource() source_file = {
-	const memstream = bufio::fixed(*(&TEST_SOURCE: *[]u8), io::mode::READ);
+	const memstream = bufio::fixed(strings::toutf8(TEST_SOURCE), io::mode::READ);
 	const lexer = lex::init(&memstream, "TEST_SOURCE");
 	return source_file {
 		path = "TEST_SOURCE",
