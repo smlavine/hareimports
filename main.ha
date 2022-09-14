@@ -64,7 +64,7 @@ export fn main() void = {
 		('l', "list source file imports (default)"),
 		('m', "module path", "use a module that isn't the cwd"),
 		('T', "tags...", "set tags"),
-		"file..."
+		"files... (XXX: must be full paths for now)"
 	];
 	const cmd = getopt::parse(os::args, help...);
 	defer getopt::finish(&cmd);
