@@ -1,18 +1,25 @@
 .POSIX:
 
-HARE = hare
+include config.mk
 
+NAME = hareimports
 SRC = editing.ha main.ha
 
-all: hareimports
+all: $(NAME)
 
-hareimports: $(SRC)
-	$(HARE) build $(HAREFLAGS) -o $@
+$(NAME): $(SRC)
+	$(HARE) build $(HAREFLAGS) -o $(NAME)
 
 check:
 	$(HARE) test
 
-clean:
-	rm -f hareimports
+install: $(NAME)
+	cp $(NAME) $(DESTDIR)$(PREFIX)/bin
 
-.PHONY: all check clean
+uninstall:
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(NAME)
+
+clean:
+	rm -f $(NAME)
+
+.PHONY: all check clean install uninstall
